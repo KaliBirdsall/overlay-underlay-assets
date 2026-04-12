@@ -169,15 +169,16 @@
   let audio = null;
 
   function startExperience() {
-    // Hide start screen
     document.getElementById('start-screen').classList.add('hidden');
-    // Show control bar
     document.getElementById('controlBar').style.display = 'flex';
-    // Show start label
     document.getElementById('startLabel').classList.remove('hidden');
-    // Start MindAR
     const scene = document.getElementById('arScene');
-    scene.components['mindar-image-system'].start();
+    scene.addEventListener('loaded', function() {
+      scene.components['mindar-image-system'].start();
+    });
+    if (scene.hasLoaded) {
+      scene.components['mindar-image-system'].start();
+    }
   }
 
   function handlePlay() {
