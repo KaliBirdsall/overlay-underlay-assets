@@ -1,12 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     overflow: hidden;
     font-family: sans-serif;
+    background: #000;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  #start-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    color: white;
+    gap: 20px;
+  }
+
+  #start-screen.hidden {
+    display: none;
+  }
+
+  #start-btn {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 14px 32px;
+    font-size: 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    letter-spacing: 1px;
   }
 
   .control-bar {
@@ -17,10 +52,9 @@
     height: 15vh;
     background: #000;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
     gap: 48px;
-    padding-bottom: 20px;
     z-index: 9998;
   }
 
@@ -57,7 +91,7 @@
     font-size: 18px;
     letter-spacing: 1px;
     opacity: 0.8;
-    z-index: 9998;
+    z-index: 9999;
   }
 
   .start-label.hidden { display: none; }
@@ -67,19 +101,23 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 75vh;
+    height: 85vh;
   }
 </style>
 
-<!-- MindAR + A-Frame -->
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 </head>
 <body>
 
-  <div class="start-label" id="startLabel">Touch play to start</div>
+  <!-- Start screen shown first to get user gesture for camera permission -->
+  <div id="start-screen">
+    <p style="font-size: 18px; letter-spacing: 1px; opacity: 0.8;">Touch play to start</p>
+    <button id="start-btn" onclick="startExperience()">&#9654;</button>
+  </div>
 
   <a-scene
-    mindar-image="imageTargetSrc: https://raw.githubusercontent.com/KaliBirdsall/overlay-underlay-assets/refs/heads/main/targets.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
+    id="arScene"
+    mindar-image="imageTargetSrc: https://raw.githubusercontent.com/KaliBirdsall/overlay-underlay-assets/refs/heads/main/targets.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;"
     color-space="sRGB"
     renderer="colorManagement: true, physicallyCorrectLights"
     vr-mode-ui="enabled: false"
@@ -107,7 +145,9 @@
 
   </a-scene>
 
-  <div class="control-bar">
+  <div class="start-label hidden" id="startLabel">Touch play to start</div>
+
+  <div class="control-bar" id="controlBar" style="display:none">
 
     <button class="btn" id="playBtn" onclick="handlePlay()">
       <img id="iconPlay" src="https://raw.githubusercontent.com/KaliBirdsall/overlay-underlay-assets/refs/heads/main/play1.svg" alt="Play" />
@@ -127,6 +167,18 @@
   let xrayOn = false;
   let narrationEnded = false;
   let audio = null;
+
+  function startExperience() {
+    // Hide start screen
+    document.getElementById('start-screen').classList.add('hidden');
+    // Show control bar
+    document.getElementById('controlBar').style.display = 'flex';
+    // Show start label
+    document.getElementById('startLabel').classList.remove('hidden');
+    // Start MindAR
+    const scene = document.getElementById('arScene');
+    scene.components['mindar-image-system'].start();
+  }
 
   function handlePlay() {
     if (narrationEnded) {
